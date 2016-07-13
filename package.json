@@ -1,0 +1,232 @@
+{
+    "author": "jfosnav@gmail.com",
+    "dependencies": {
+        "pebble-simple-health": "^1.0.3"
+    },
+    "keywords": [],
+    "name": "pacman",
+    "pebble": {
+        "capabilities": [
+            ""
+        ],
+        "displayName": "Pacman",
+        "enableMultiJS": true,
+        "messageKeys": [],
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/5000.png",
+                    "name": "5000",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/3000.png",
+                    "name": "3000",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/2000.png",
+                    "name": "2000",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/1000.png",
+                    "name": "1000",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/700.png",
+                    "name": "700",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/500.png",
+                    "name": "500",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/300.png",
+                    "name": "300",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/100.png",
+                    "name": "100",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/llave.png",
+                    "name": "LLAVE",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/campana.png",
+                    "name": "CAMPANA",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/galaxian.png",
+                    "name": "GALAXIAN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/chirimoya.png",
+                    "name": "CHIRIMOYA",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/melocoton.png",
+                    "name": "MELOCOTON",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/fresa.png",
+                    "name": "FRESA",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/manzana.png",
+                    "name": "MANZANA",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/cerezas.png",
+                    "name": "CEREZAS",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/200.png",
+                    "name": "200",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/bat0.png",
+                    "name": "BAT0",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/bat1.png",
+                    "name": "BAT1",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/bat2.png",
+                    "name": "BAT2",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/bat3.png",
+                    "name": "BAT3",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "fonts/Joystix2.TTF",
+                    "name": "JOYSTIX_18",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "file": "fonts/Joystix.TTF",
+                    "name": "JOYSTIX_35",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "file": "images/background3.png",
+                    "name": "BACKGROUND",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/scared.png",
+                    "name": "SCARED",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/big_dot.png",
+                    "name": "BIG_DOT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/inky_left.png",
+                    "name": "INKY_LEFT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/inky_right.png",
+                    "name": "INKY_RIGHT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/pacman_left.png",
+                    "name": "PACMAN_LEFT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/pacman_right.png",
+                    "name": "PACMAN_RIGHT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "basalt",
+            "chalk"
+        ],
+        "uuid": "464396fa-a47e-4a22-ade6-bcfb4912b016",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "1.0.0"
+}
