@@ -1,34 +1,54 @@
+
+
 #include <pebble.h>
+
+
+
 
 #include <pebble-simple-health/pebble-simple-health.h>
 
 
+#define KEY_CHARACTER 0
+
+
+
+#define CHARACTER_PACMAN 0
+#define CHARACTER_MSPACMAN 1
+
+
 #ifdef PBL_PLATFORM_CHALK
+  #define OFFSET_X_CHALK 18
   #define HALLWAY_Y 16 + 6
 	#define HALLWAY2_Y 111 + 6
-  #define BIGDOT_X 120 + 18
-	#define PACMAN_START 40 + 18
-	#define PACMAN_END 110 + 18
-  #define PACMAN_END2 15 + 18
-	#define GHOST_START -10 + 18
-	#define GHOST_END 70 + 18
-  #define GHOST_END2 5 + 18
+  #define BIGDOT_X 120 + OFFSET_X_CHALK
+	#define PACMAN_START 40 
+	#define PACMAN_END 110 
+  #define PACMAN_END2 15 
+	#define GHOST_START -10 
+	#define GHOST_END 70 
+  #define GHOST_END2 5
+	#define POINTS_PACMAN_X 30 + OFFSET_X_CHALK + 25
 
+	
 
-	#define PACMAN_FRUIT_START -28 
-	#define PACMAN_FRUIT_END 180 +28 
+	#define PACMAN_FRUIT_START -20 
+	#define PACMAN_FRUIT_END 180 +10 
   #define DISTANCE_FRUIT 1000
+  #define TOTAL_FRUITS 8
 
-	#define TIME_X 14 + 18
+	#define TIME_X 14 + OFFSET_X_CHALK
 	#define TIME_Y 53 + 6
   #define BATTERY_X 67 
 	#define BATTERY_Y 155 + 6 + 2
 
-	#define FRUIT_X 58 + 18
-  #define POINTS_FRUIT_X 56 + 18
+	#define FRUIT_X 56 + OFFSET_X_CHALK
+  #define POINTS_FRUIT_X 56 + OFFSET_X_CHALK
 	
 	#define DATE_X 62
 	#define DATE_Y 190
+
+	#define END_X 0 + OFFSET_X_CHALK
+	#define END_Y 108 + 6
 #endif
 
 #ifdef PBL_PLATFORM_BASALT
@@ -41,33 +61,57 @@
 	#define GHOST_START -10
 	#define GHOST_END 70
   #define GHOST_END2 5
+  #define POINTS_PACMAN_X 30
 
-	#define PACMAN_FRUIT_START -28
-	#define PACMAN_FRUIT_END 144+28
+	#define PACMAN_FRUIT_START -20
+	#define PACMAN_FRUIT_END 144+10
 	#define DISTANCE_FRUIT 1000
+  #define TOTAL_FRUITS 8
 
 	#define TIME_X 14
 	#define TIME_Y 53
   #define BATTERY_X 4
 	#define BATTERY_Y 155
 
-	#define FRUIT_X 58
+	#define FRUIT_X 56
   #define POINTS_FRUIT_X 56
 
 	#define DATE_X 62
 	#define DATE_Y 150
+
+	#define END_X 0
+	#define END_Y 108 
 #endif
 
 static Window *s_main_window;
 
-//int steps = 10000;
+static int character = CHARACTER_PACMAN;
+
+//int steps = 0;
 
 static GBitmap *s_background_bitmap, *s_ghost_bitmap, *s_pacman_bitmap, *s_bigdot_bitmap, *s_battery_bitmap, *s_points_pacman_bitmap, *s_fruit_bitmap, *s_points_fruit_bitmap;
 static BitmapLayer *s_background_layer, *s_ghost_layer, *s_pacman_layer, *s_bigdot_layer, *s_battery_layer, *s_points_pacman_layer, *s_fruit_layer, *s_points_fruit_layer;
 
-static TextLayer *s_time_layer, *s_date_layer;
-static GFont s_time_font, s_date_font;
+static TextLayer *s_time_layer, *s_date_layer, *s_end_layer;
+static GFont s_time_font, s_date_font, s_end_font;
 
+const int GHOST_LEFT[4] = {
+  RESOURCE_ID_BLINKY_LEFT, RESOURCE_ID_PINKY_LEFT, RESOURCE_ID_INKY_LEFT, RESOURCE_ID_CLYDE_LEFT
+};
+
+
+const int GHOST_RIGHT[4] = {
+  RESOURCE_ID_BLINKY_RIGHT, RESOURCE_ID_PINKY_RIGHT, RESOURCE_ID_INKY_RIGHT, RESOURCE_ID_CLYDE_RIGHT
+};
+
+const int PACMAN_RIGHT[2] = {
+  RESOURCE_ID_PACMAN_RIGHT, RESOURCE_ID_MSPACMAN_RIGHT
+};
+
+
+const int PACMAN_LEFT[2] = {
+  RESOURCE_ID_PACMAN_LEFT, RESOURCE_ID_MSPACMAN_LEFT
+};
 
 
 static void update_battery() {  /* mejor será suscribirse a un servicio, esto se hace cada minuto y no mola */
@@ -112,7 +156,7 @@ static void update_time() {
     // Use 12 hour format
     strftime(buffer, sizeof("00:00"), "%I:%M", tick_time);
   }
-	APP_LOG(APP_LOG_LEVEL_INFO, "Time %s",buffer);
+	//APP_LOG(APP_LOG_LEVEL_INFO, "Time %s",buffer);
 	
 
 		
@@ -120,93 +164,167 @@ static void update_time() {
 
 
 	
+	int ghost = (tick_time->tm_mday) % 4;
+	
 	
 	int steps = health_get_metric_sum(HealthMetricStepCount);
 	int goal = health_get_metric_goal(HealthMetricStepCount);
 	
 	
 	
- // int  goal = 10000;
-//	steps=steps + 50;
+//  int goal = 10000;
+//	steps=steps + 200;
 	
 
 	
 	
 	if (steps < (goal/2)) {
 		
-	//	gbitmap_destroy(s_pacman_bitmap);
-  //	gbitmap_destroy(s_bigdot_bitmap);
-	//	gbitmap_destroy(s_ghost_bitmap);
-		
-	//	s_bigdot_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BIG_DOT);
-	//	bitmap_layer_set_compositing_mode(s_bigdot_layer, GCompOpSet);
+		//pacman va hacia la derecha huyendo de Inky
+
+		//mostramos bigdot
 		bitmap_layer_set_bitmap(s_bigdot_layer, s_bigdot_bitmap);
 		
-		float factor = (float)steps / ((float)goal / 2);
+		//no mostramos end
+		text_layer_set_text(s_end_layer, "");
+
+		//mostramos la fruta (la cereza)
+		gbitmap_destroy(s_fruit_bitmap);
+		s_fruit_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CEREZAS);
+		layer_set_frame(bitmap_layer_get_layer(s_fruit_layer),GRect(FRUIT_X, HALLWAY2_Y, 29, 29));
+		bitmap_layer_set_compositing_mode(s_fruit_layer, GCompOpSet);
+		bitmap_layer_set_bitmap(s_fruit_layer, s_fruit_bitmap);
+
+			
+	
 		
-		int pos_x_pacman = PACMAN_START + factor * (PACMAN_END - PACMAN_START);
-		s_pacman_bitmap = gbitmap_create_with_resource(RESOURCE_ID_PACMAN_RIGHT);
+		
+		float factor = (float)steps / ((float)goal / 2);
+		//mostramos a pacman
+		gbitmap_destroy(s_pacman_bitmap);
+		int pos_x_pacman = PACMAN_START + factor * (PACMAN_END - PACMAN_START);	
+		#ifdef PBL_PLATFORM_CHALK
+			pos_x_pacman = pos_x_pacman + OFFSET_X_CHALK;
+		#endif
+		s_pacman_bitmap = gbitmap_create_with_resource(PACMAN_RIGHT[character]);
 		layer_set_frame(bitmap_layer_get_layer(s_pacman_layer),GRect(pos_x_pacman, HALLWAY_Y, 28, 28));
 		bitmap_layer_set_compositing_mode(s_pacman_layer, GCompOpSet);
 		bitmap_layer_set_bitmap(s_pacman_layer, s_pacman_bitmap);
 		
+		//mostramos a inky
+		gbitmap_destroy(s_ghost_bitmap);
 		int pos_x_ghost = GHOST_START + factor * (GHOST_END - GHOST_START);
-		s_ghost_bitmap = gbitmap_create_with_resource(RESOURCE_ID_INKY_RIGHT);
+		#ifdef PBL_PLATFORM_CHALK
+			pos_x_ghost = pos_x_ghost + OFFSET_X_CHALK;
+		#endif
+		s_ghost_bitmap = gbitmap_create_with_resource(GHOST_RIGHT[ghost]);
 		layer_set_frame(bitmap_layer_get_layer(s_ghost_layer),GRect(pos_x_ghost, HALLWAY_Y, 28, 28));
 		bitmap_layer_set_compositing_mode(s_ghost_layer, GCompOpSet);
 		bitmap_layer_set_bitmap(s_ghost_layer, s_ghost_bitmap);
 		
-
 		
 		
-		//APP_LOG(APP_LOG_LEVEL_INFO, "Pos_x %d",pos_x_ghost);
+		
+		
 	}
 	
 	
 	if ((steps >= (goal/2)) && (steps <= goal)) {
+		
+		//pacman va hacia la izquierda persiguiendo a Inky asustado
 		
 	//	gbitmap_destroy(s_pacman_bitmap);
 	//  gbitmap_destroy(s_bigdot_bitmap);
 	//	gbitmap_destroy(s_ghost_bitmap);
 		
 	//	int steps=steps-goal/2;
-		float factor = (float)(steps-goal/2) / ((float)goal / 2);
+		
+		
+		//no mostramos bigdot
 		bitmap_layer_set_bitmap(s_bigdot_layer, NULL);
 		
+		//no mostramos end
+		text_layer_set_text(s_end_layer, "");
+		
+		//mostramos la fruta (la cereza)
+		gbitmap_destroy(s_fruit_bitmap);
+		s_fruit_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CEREZAS);
+		layer_set_frame(bitmap_layer_get_layer(s_fruit_layer),GRect(FRUIT_X, HALLWAY2_Y, 29, 29));
+		bitmap_layer_set_compositing_mode(s_fruit_layer, GCompOpSet);
+		bitmap_layer_set_bitmap(s_fruit_layer, s_fruit_bitmap);
+		
+		float factor = (float)(steps-goal/2) / ((float)goal / 2);	
+		//mostramos a pacman
+		gbitmap_destroy(s_pacman_bitmap);
 		int pos_x_pacman = PACMAN_END + factor * (PACMAN_END2 - PACMAN_END);
-		s_pacman_bitmap = gbitmap_create_with_resource(RESOURCE_ID_PACMAN_LEFT);
+		#ifdef PBL_PLATFORM_CHALK
+			pos_x_pacman = pos_x_pacman + OFFSET_X_CHALK;
+		#endif
+		s_pacman_bitmap = gbitmap_create_with_resource(PACMAN_LEFT[character]);
 		layer_set_frame(bitmap_layer_get_layer(s_pacman_layer),GRect(pos_x_pacman, HALLWAY_Y, 28, 28));
 		bitmap_layer_set_compositing_mode(s_pacman_layer, GCompOpSet);
 		bitmap_layer_set_bitmap(s_pacman_layer, s_pacman_bitmap);
 		
+		//mostramos a inky
+		gbitmap_destroy(s_ghost_bitmap);
 		int pos_x_ghost = GHOST_END + factor * (GHOST_END2 - GHOST_END);
+		#ifdef PBL_PLATFORM_CHALK
+			pos_x_ghost = pos_x_ghost + OFFSET_X_CHALK;
+		#endif
 		s_ghost_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SCARED);
 		layer_set_frame(bitmap_layer_get_layer(s_ghost_layer),GRect(pos_x_ghost, HALLWAY_Y, 28, 28));
 		bitmap_layer_set_compositing_mode(s_ghost_layer, GCompOpSet);
 		bitmap_layer_set_bitmap(s_ghost_layer, s_ghost_bitmap);
 		
+	
 	}
 	
 	
 	if ((steps > (goal)) && (steps <= (goal+200))){  //sacamos la puntuación
-		bitmap_layer_set_bitmap(s_points_pacman_layer, s_points_pacman_bitmap);
-		bitmap_layer_set_bitmap(s_pacman_layer, NULL);
-		bitmap_layer_set_bitmap(s_ghost_layer, NULL);
+		//pacman se ha comido a Inky, hacemos desaparecer a los dos y mostramos la puntuación
+		//no mostramos big dot
 		bitmap_layer_set_bitmap(s_bigdot_layer, NULL);
+		//mostramos la puntuación
+		bitmap_layer_set_bitmap(s_points_pacman_layer, s_points_pacman_bitmap);
+		//no mostramos a pacman
+		bitmap_layer_set_bitmap(s_pacman_layer, NULL);
+		//no mostramos a Inky
+		bitmap_layer_set_bitmap(s_ghost_layer, NULL);
+		//mostramos la fruta (la cereza)
+		gbitmap_destroy(s_fruit_bitmap);
+		s_fruit_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CEREZAS);
+		layer_set_frame(bitmap_layer_get_layer(s_fruit_layer),GRect(FRUIT_X, HALLWAY2_Y, 29, 29));
+		bitmap_layer_set_compositing_mode(s_fruit_layer, GCompOpSet);
+		bitmap_layer_set_bitmap(s_fruit_layer, s_fruit_bitmap);
+		
 	} else {
+		//no mostramos la puntuación
 		bitmap_layer_set_bitmap(s_points_pacman_layer, NULL);
 	}
 	
-  if (steps > (goal)) {  //a comer fruta
-	//	gbitmap_destroy(s_pacman_bitmap);
+  if ((steps > (goal)) && (steps <= (goal + DISTANCE_FRUIT * TOTAL_FRUITS))) {  //a comer fruta
+		//pacman va por el pasillo inferior a comerse la fruta
+		
+		//no mostramos bigdot
+		bitmap_layer_set_bitmap(s_bigdot_layer, NULL);
+		
+		//no mostramos a Inky
+		bitmap_layer_set_bitmap(s_ghost_layer, NULL);
+		
+		//no mostramos end
+		text_layer_set_text(s_end_layer, "");
+		
+		
+		//mostramos a pacman
+		gbitmap_destroy(s_pacman_bitmap);
 		float factor = (float)((steps-goal) % DISTANCE_FRUIT) / DISTANCE_FRUIT;
 		int pos_x_pacman = PACMAN_FRUIT_START + factor * (PACMAN_FRUIT_END - PACMAN_FRUIT_START);
-		s_pacman_bitmap = gbitmap_create_with_resource(RESOURCE_ID_PACMAN_RIGHT);
+		s_pacman_bitmap = gbitmap_create_with_resource(PACMAN_RIGHT[character]);
 		layer_set_frame(bitmap_layer_get_layer(s_pacman_layer),GRect(pos_x_pacman, HALLWAY2_Y, 28, 28));
 		bitmap_layer_set_compositing_mode(s_pacman_layer, GCompOpSet);
 		bitmap_layer_set_bitmap(s_pacman_layer, s_pacman_bitmap);
 		
-		
+		//mostramos la fruta
 		int fruit_number = (steps-goal) / DISTANCE_FRUIT;
 		
 		bitmap_layer_set_bitmap(s_fruit_layer, NULL);
@@ -242,8 +360,9 @@ static void update_time() {
 			bitmap_layer_set_bitmap(s_fruit_layer, s_fruit_bitmap);
 		}	
 		
-		bitmap_layer_set_bitmap(s_points_fruit_layer, NULL);
-		if ((((steps-goal) % DISTANCE_FRUIT) > (DISTANCE_FRUIT/2)) && (((steps-goal) % DISTANCE_FRUIT) < ((DISTANCE_FRUIT/2)+300))) { //pintar fruta
+		
+		//mostramos la puntuación
+		if ((((steps-goal) % DISTANCE_FRUIT) > (DISTANCE_FRUIT/2)) && (((steps-goal) % DISTANCE_FRUIT) < ((DISTANCE_FRUIT/2)+300))) { 
 			gbitmap_destroy(s_points_fruit_bitmap);
 			switch(fruit_number) {
 				case 0:
@@ -272,7 +391,27 @@ static void update_time() {
 				break;			
 			}
 			bitmap_layer_set_bitmap(s_points_fruit_layer, s_points_fruit_bitmap);
-		}	
+		}	else {
+			//no mostramos la puntuación
+			bitmap_layer_set_bitmap(s_points_fruit_layer, NULL);
+		}
+		
+		
+	}
+	
+	if (steps > (goal + DISTANCE_FRUIT * TOTAL_FRUITS)) {
+		//FINAL
+		//no mostramos big dot
+		bitmap_layer_set_bitmap(s_bigdot_layer, NULL);
+		//no mostramos a pacman
+		bitmap_layer_set_bitmap(s_pacman_layer, NULL);
+		//no mostramos a Inky
+		bitmap_layer_set_bitmap(s_ghost_layer, NULL);
+		//no mostramos la fruta 
+		bitmap_layer_set_bitmap(s_fruit_layer, NULL);
+		//monstramos end 
+		text_layer_set_text(s_end_layer, "YOU WIN!");
+
 		
 		
 	}
@@ -283,15 +422,96 @@ static void update_time() {
 	if(minutes == 0) {	
 		update_battery();
 	}
+	
+//	APP_LOG(APP_LOG_LEVEL_INFO, "steps %d",steps);
+//	APP_LOG(APP_LOG_LEVEL_INFO, "goal %d",goal);
 
 }
 		
 
 
 
+void process_tuple(Tuple *t)
+{
+	
+ 
+ //Get key
+	//APP_LOG(APP_LOG_LEVEL_INFO, "viendo tupla");
+	
+	
+
+  int key = t->key;
+	
+  //Decide what to do
+  switch(key) {	
+		  	
+			case KEY_CHARACTER:
+			   
+			
+				if(strcmp(t->value->cstring, "p") == 0)
+				{
+					//Set and save
+					character = CHARACTER_PACMAN;
+					persist_write_int(KEY_CHARACTER, CHARACTER_PACMAN);
+					update_time();
+				}
+				else if(strcmp(t->value->cstring, "m") == 0)
+				{
+					//Set and save 
+				
+					character = CHARACTER_MSPACMAN;
+					persist_write_int(KEY_CHARACTER, CHARACTER_MSPACMAN);
+					update_time();
+				}
+				
+      break;
+		
+	}		
+				
+			
+
+}
+
+
+static void in_received_handler(DictionaryIterator *iter, void *context) 
+{
+		
+    (void) context;
+    //Get data
+    Tuple *t = dict_read_first(iter);
+    while(t != NULL)
+    {		
+			process_tuple(t);      
+      //Get next
+      t = dict_read_next(iter);
+    }
+}
+
+
+
+static void inbox_dropped_callback(AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
+}
+
+static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+}
+
+static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+}
+
 
 
 static void main_window_load(Window *window) {
+	
+
+	
+	if (persist_exists(KEY_CHARACTER)) {
+		character = persist_read_int(KEY_CHARACTER);		
+	} else {
+		character = CHARACTER_PACMAN;
+	}
 
   //Load bitmaps into GBitmap structures
 
@@ -368,23 +588,41 @@ static void main_window_load(Window *window) {
   text_layer_set_text_color(s_date_layer, GColorWhite);
 	text_layer_set_background_color(s_date_layer, GColorClear);
   text_layer_set_text(s_date_layer, "25 MAR");
+	//Create GFont
+  s_date_font =  fonts_load_custom_font(resource_get_handle(RESOURCE_ID_JOYSTIX_18));
+  //Apply to TextLayer
+  text_layer_set_font(s_date_layer, s_date_font);
+  text_layer_set_text_alignment(s_date_layer, GTextAlignmentRight);
+	layer_add_child(window_get_root_layer(s_main_window), text_layer_get_layer(s_date_layer));
+	
+	
+	 //end
+	s_end_layer= text_layer_create(GRect(END_X, END_Y, 144, 30)); // 0,0,144,84
+  //	text_layer_set_background_color(s_time_layer, GColorBlack);
+  text_layer_set_text_color(s_end_layer, GColorWhite);
+	text_layer_set_background_color(s_end_layer, GColorClear);
+  text_layer_set_text(s_end_layer, "YOU WIN!");
+	//Create GFont
+  s_end_font =  fonts_load_custom_font(resource_get_handle(RESOURCE_ID_JOYSTIX_25));
+  //Apply to TextLayer
+  text_layer_set_font(s_end_layer, s_end_font);
+  text_layer_set_text_alignment(s_end_layer, GTextAlignmentCenter);
+	layer_add_child(window_get_root_layer(s_main_window), text_layer_get_layer(s_end_layer));
 	
 	
 	 //points_pacman
+	
+	
+	
 	s_points_pacman_bitmap = gbitmap_create_with_resource(RESOURCE_ID_200);
-	s_points_pacman_layer = bitmap_layer_create(GRect(GHOST_END2, HALLWAY_Y, 30, 28));
+	s_points_pacman_layer = bitmap_layer_create(GRect(GHOST_END2, HALLWAY_Y, POINTS_PACMAN_X, 28));
 	bitmap_layer_set_bitmap(s_points_pacman_layer, NULL);
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_points_pacman_layer));
 	
 	
 	
 	
-	 //Create GFont
-  s_date_font =  fonts_load_custom_font(resource_get_handle(RESOURCE_ID_JOYSTIX_18));
-  //Apply to TextLayer
-  text_layer_set_font(s_date_layer, s_date_font);
-  text_layer_set_text_alignment(s_date_layer, GTextAlignmentRight);
-	layer_add_child(window_get_root_layer(s_main_window), text_layer_get_layer(s_date_layer));
+
 
   #ifdef PBL_PLATFORM_CHALK
   
@@ -410,13 +648,35 @@ static void tick_minutos(struct tm *tick_time, TimeUnits units_changed) {
 
 	
 static void main_window_unload(Window *window) {
-	//Destroy GBitmaps
 	
-//	gbitmap_destroy(minute_bitmap_unit);
+
 	
-	// Destroy Layers
- 
-//	bitmap_layer_destroy(minute_layer_unit);
+		//Destroy GBitmaps
+	gbitmap_destroy(s_background_bitmap);
+	gbitmap_destroy(s_ghost_bitmap);
+	gbitmap_destroy(s_pacman_bitmap);
+	gbitmap_destroy(s_bigdot_bitmap);
+	gbitmap_destroy(s_battery_bitmap);
+	gbitmap_destroy(s_points_pacman_bitmap);
+	gbitmap_destroy(s_fruit_bitmap);
+	gbitmap_destroy(s_points_fruit_bitmap);
+	
+	
+	// Destroy TextLayers
+  text_layer_destroy(s_time_layer);
+	text_layer_destroy(s_date_layer);
+	text_layer_destroy(s_end_layer);
+
+
+	//Destroy  layers
+	bitmap_layer_destroy(s_background_layer);
+	bitmap_layer_destroy(s_ghost_layer);
+	bitmap_layer_destroy(s_pacman_layer);
+	bitmap_layer_destroy(s_bigdot_layer);
+	bitmap_layer_destroy(s_battery_layer);
+	bitmap_layer_destroy(s_points_pacman_layer);
+	bitmap_layer_destroy(s_fruit_layer);
+	bitmap_layer_destroy(s_points_fruit_layer);
 }
 
 
@@ -436,6 +696,14 @@ static void init() {
 	// Register with TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT , tick_minutos);
 
+	// Register callbacks
+	app_message_register_inbox_received((AppMessageInboxReceived) in_received_handler);
+	app_message_register_inbox_dropped(inbox_dropped_callback);
+	app_message_register_outbox_failed(outbox_failed_callback);
+	app_message_register_outbox_sent(outbox_sent_callback);
+
+	app_message_open(784, 784);
+	
 }
 	
 

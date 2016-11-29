@@ -7,14 +7,95 @@
     "name": "pacman",
     "pebble": {
         "capabilities": [
-            ""
+            "configurable",
+            "health"
         ],
         "displayName": "Pacman",
         "enableMultiJS": true,
-        "messageKeys": [],
+        "messageKeys": {
+            "KEY_CHARACTER": 0
+        },
         "projectType": "native",
         "resources": {
             "media": [
+                {
+                    "file": "images/mspacman_left.png",
+                    "name": "MSPACMAN_LEFT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/mspacman_right.png",
+                    "name": "MSPACMAN_RIGHT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/clyde_left.png",
+                    "name": "CLYDE_LEFT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/clyde_right.png",
+                    "name": "CLYDE_RIGHT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/pinky_left.png",
+                    "name": "PINKY_LEFT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/pinky_right.png",
+                    "name": "PINKY_RIGHT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/blinky_left.png",
+                    "name": "BLINKY_LEFT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/blinky_right.png",
+                    "name": "BLINKY_RIGHT",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "fonts/Joystix3.TTF",
+                    "name": "JOYSTIX_25",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
                 {
                     "file": "images/5000.png",
                     "name": "5000",
@@ -228,5 +309,5 @@
             "watchface": true
         }
     },
-    "version": "1.0.0"
+    "version": "1.4.0"
 }
